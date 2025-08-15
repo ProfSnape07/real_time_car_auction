@@ -36,17 +36,27 @@ sequenceDiagram
     participant BidConsumer
     participant Database
 
-    Client->>+Gateway: placeBid({ auctionId, amount })
-    Gateway->>Redis: Check Rate Limit
+    Client-->>+Gateway: placeBid({ auctionId, amount })
+    Gateway-->>Redis: Check Rate Limit
     Redis-->>Gateway: OK
-    Gateway->>+Kafka: Produce("bid-events", bid)
-    Gateway-->>-Client: (Ack - Bid Received)
-    Kafka-->>-BidConsumer: Consume(bid)
-    BidConsumer->>+Database: $transaction(placeBid)
-    Database-->>-BidConsumer: Bid Successful
-    BidConsumer->>+Redis: Publish("auction_updates", newBid)
-    Redis-->>Gateway: Receive Pub/Sub Message
-    Gateway->>-Client: emit("newBid", data)
+    Gateway-->>+Kafka: Produce("bid-events", bid)
+    
+
+    Kafka-->>BidConsumer: Consume(bid)
+    BidConsumer-->>+Database: Check with Database
+    Database-->>BidConsumer: Valid Bid
+    BidConsumer-->>+Database: Update Database
+    BidConsumer-->>+Redis: Update Cache
+
+    BidConsumer-->>Redis: Publish("auction_updates", newBid)
+    Redis-->>Gateway: Pub/Sub: newBid
+    Gateway-->>Client: emit("newBid", data)
+
+    Database-->>BidConsumer: Invalid Bid
+    BidConsumer-->>Redis: Publish("bidRejected", socketId)
+    Redis-->>Gateway: Pub/Sub: bidRejected
+    Gateway-->>Client: emit("bidRejected", error)
+
 
 ```
 
