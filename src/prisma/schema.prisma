@@ -1,0 +1,55 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// User model to store bidder information
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  username String @unique
+  fullName String
+  password String // Stores the hashed password
+  role     String @default("user") // Added role column with a default value
+
+  bids    Bid[]
+  Auction Auction[] @relation("Winner")
+}
+
+// Auction model to store details about each car auction
+model Auction {
+  id               Int      @id @default(autoincrement())
+  carId            String   @unique
+  startTime        DateTime
+  endTime          DateTime
+  startingBid      Decimal  @default(0.0) @db.Decimal(14, 2)
+  currentHighestBid Decimal @default(0.0) @db.Decimal(14, 2)
+  isOpen            Boolean  @default(true)
+
+  // A version number for optimistic locking to handle concurrent updates
+  version          Int      @default(1)
+
+  // Relationships
+  bids          Bid[]
+  winnerId      Int?
+  winner        User?    @relation("Winner", fields: [winnerId], references: [id])
+}
+
+// Bid model to log every bid placed on an auction
+model Bid {
+  id        Int      @id @default(autoincrement())
+  amount    Decimal  @db.Decimal(14, 2)
+  timestamp DateTime @default(now())
+
+  // Relationships
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  auctionId Int
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+
+  @@index([auctionId, userId]) // Composite index for efficient lookups
+}

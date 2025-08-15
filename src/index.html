@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Car Auction</title>
+  <!-- Inter font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS Configuration for dark mode -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    };
+  </script>
+  <style>
+      body {
+          font-family: 'Inter', sans-serif;
+          /* The background color is now controlled by Tailwind classes for dark mode */
+      }
+
+      .bid-animate {
+          animation: pulse-ring 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      @keyframes pulse-ring {
+          0%, 100% {
+              transform: scale(1);
+          }
+          50% {
+              transform: scale(1.05);
+          }
+      }
+  </style>
+</head>
+<body
+  class="bg-gray-100 dark:bg-gray-950 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+<div
+  class="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-2xl max-w-lg w-full transform transition-transform duration-300 hover:scale-105">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-gray-100">Live Car Auction</h1>
+    <button id="themeToggleBtn"
+            class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+      <!-- Moon icon for light mode, Sun icon for dark mode -->
+      <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24"
+           stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      </svg>
+      <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+           stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- User Info -->
+  <div class="flex items-center justify-end mb-6">
+    <div id="userInfoDisplay" class="text-sm font-medium text-gray-600 dark:text-gray-400 hidden">
+      <span class="mr-2">Logged in as: <span id="userFullName" class="font-bold"></span></span>
+      <button id="logoutBtn"
+              class="py-1 px-3 rounded-md text-xs font-medium text-white bg-red-500 hover:bg-red-600 transition-colors duration-200">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Login/Register Section -->
+  <div id="authSection" class="space-y-4">
+    <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 text-center" id="authTitle">Login</h2>
+    <form id="authForm" class="space-y-4">
+      <div>
+        <label for="userEmailInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+        <input type="email" id="userEmailInput" required
+               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+      </div>
+      <div id="registerFields" class="space-y-4 hidden">
+        <div>
+          <label for="userNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+          <input type="text" id="userNameInput"
+                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+        </div>
+        <div>
+          <label for="userFullNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full
+            Name</label>
+          <input type="text" id="userFullNameInput"
+                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+        </div>
+      </div>
+      <div>
+        <label for="userPasswordInput"
+               class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+        <input type="password" id="userPasswordInput" required
+               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+      </div>
+      <button type="submit" id="authBtn"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+        Login
+      </button>
+    </form>
+    <div class="text-center mt-2">
+      <button id="toggleAuthBtn"
+              class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+        Don't have an account? Register
+      </button>
+    </div>
+  </div>
+
+  <!-- Auction List Section -->
+  <div id="auctionListSection" class="space-y-4 hidden">
+    <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300">Available Auctions</h2>
+    <div id="auctionList" class="space-y-2">
+      <!-- Auction items will be dynamically inserted here -->
+    </div>
+  </div>
+
+  <!-- Auction Details and Bidding Section -->
+  <div id="auctionSection" class="space-y-6 mt-8 hidden">
+    <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-inner">
+      <div>
+        <div class="flex items-center gap-4 mb-2">
+          <h2 class="text-xl font-bold text-indigo-600">Auction Room: <span id="currentAuctionId"></span></h2>
+          <span id="connectionStatus"
+                class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+              <span class="w-2 h-2 mr-2 bg-red-500 rounded-full animate-pulse"></span>
+              Disconnected
+          </span>
+        </div>
+        <div class="space-y-2">
+          <p class="text-sm text-gray-600 dark:text-gray-400">Current Highest Bid:</p>
+          <div id="highestBidDisplay" class="text-4xl font-extrabold text-green-600 bid-animate">
+            $0.00
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Winner: <span id="currentWinner" class="font-semibold text-gray-800 dark:text-gray-200">No Bids Yet</span>
+          </p>
+        </div>
+      </div>
+      <!-- Added buttons container -->
+      <div class="flex flex-col space-y-2">
+        <button id="leaveAuctionBtn"
+                class="py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors duration-200">
+          Leave Auction
+        </button>
+        <!-- The new 'End Auction' button, now always visible for testing when in an auction -->
+        <button id="endAuctionBtn"
+                class="py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 transition-colors duration-200 hidden">
+          End Auction
+        </button>
+      </div>
+    </div>
+
+    <!-- Place Bid Form -->
+    <form id="bidForm" class="space-y-4">
+      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">Place Your Bid</h3>
+      <div>
+        <label for="bidAmount" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Bid
+          Amount</label>
+        <input type="number" id="bidAmount" required min="0.01" step="0.01"
+               class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+      </div>
+      <button type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+        Place Bid
+      </button>
+    </form>
+
+    <!-- Message Log -->
+    <div id="messageLog" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg max-h-48 overflow-y-auto">
+      <h3 class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">Messages</h3>
+      <div id="messages" class="space-y-1 flex flex-col-reverse"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  // DOM Elements
+  const authSection = document.getElementById('authSection');
+  const authForm = document.getElementById('authForm');
+  const authTitle = document.getElementById('authTitle');
+  const authBtn = document.getElementById('authBtn');
+  const toggleAuthBtn = document.getElementById('toggleAuthBtn');
+  const userEmailInput = document.getElementById('userEmailInput');
+  const userNameInput = document.getElementById('userNameInput');
+  const userFullNameInput = document.getElementById('userFullNameInput');
+  const userPasswordInput = document.getElementById('userPasswordInput');
+  const registerFields = document.getElementById('registerFields');
+  const auctionListSection = document.getElementById('auctionListSection');
+  const auctionListDiv = document.getElementById('auctionList');
+  const auctionSection = document.getElementById('auctionSection');
+  const connectionStatus = document.getElementById('connectionStatus');
+  const highestBidDisplay = document.getElementById('highestBidDisplay');
+  const currentWinnerDisplay = document.getElementById('currentWinner');
+  const currentAuctionIdDisplay = document.getElementById('currentAuctionId');
+  const bidForm = document.getElementById('bidForm');
+  const bidAmountInput = document.getElementById('bidAmount');
+  const messagesDiv = document.getElementById('messages');
+  const userInfoDisplay = document.getElementById('userInfoDisplay');
+  const userFullNameSpan = document.getElementById('userFullName');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const leaveAuctionBtn = document.getElementById('leaveAuctionBtn');
+  const endAuctionBtn = document.getElementById('endAuctionBtn'); // New button element
+
+  // Dark mode toggle elements
+  const html = document.documentElement;
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const sunIcon = document.getElementById('sunIcon');
+  const moonIcon = document.getElementById('moonIcon');
+
+  // Check initial theme and set icon
+  const updateThemeIcon = () => {
+    if (html.classList.contains('dark')) {
+      sunIcon.classList.remove('hidden');
+      moonIcon.classList.add('hidden');
+    } else {
+      sunIcon.classList.add('hidden');
+      moonIcon.classList.remove('hidden');
+    }
+  };
+
+  updateThemeIcon();
+
+  // Add event listener for theme toggle button
+  themeToggleBtn.addEventListener('click', () => {
+    html.classList.toggle('dark');
+    updateThemeIcon();
+  });
+
+  let socket;
+  let currentAuctionId;
+  let authToken;
+  let currentUser; // Stores the user object, including the role
+  let currentAuthMode = 'login'; // Can be 'login' or 'register'
+
+  const API_URL = 'http://localhost:3000';
+  const WEBSOCKET_URL = 'ws://localhost:3000/auction'
+
+  // Function to add a message to the log
+  const addMessage = (message, type = 'info') => {
+    const msgElement = document.createElement('p');
+    msgElement.className = 'text-sm';
+    if (type === 'error') {
+      msgElement.classList.add('text-red-600', 'font-medium', 'dark:text-red-400');
+    } else if (type === 'success') {
+      msgElement.classList.add('text-green-600', 'font-medium', 'dark:text-green-400');
+    } else {
+      msgElement.classList.add('text-gray-500', 'dark:text-gray-400');
+    }
+    msgElement.textContent = message;
+    messagesDiv.appendChild(msgElement);
+    // Auto-scroll to the top to show the new message
+    messagesDiv.scrollTop = 0;
+  };
+
+  // Function to update the visibility of the "End Auction" button
+  // For testing, this button is always visible when in an auction room.
+  // const updateEndAuctionButtonVisibility = () => {
+  //   if (currentAuctionId) {
+  //     endAuctionBtn.classList.remove('hidden');
+  //   } else {
+  //     endAuctionBtn.classList.add('hidden');
+  //   }
+  // };
+
+  // Initialize the socket connection
+  const initializeSocket = (url, token) => {
+    if (socket) {
+      socket.disconnect();
+    }
+    // Pass the token using the 'auth' option, which is more reliable for socket.io
+    socket = io(url, {
+      transports: ['websocket'],
+      auth: {
+        token: token, // The token will be available as client.handshake.auth.token on the server
+      },
+    });
+
+    socket.on('connect', () => {
+      connectionStatus.classList.remove('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-200');
+      connectionStatus.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-200');
+      connectionStatus.innerHTML = '<span class="w-2 h-2 mr-2 bg-green-500 rounded-full"></span> Connected';
+      addMessage('Connected to the auction server.', 'success');
+    });
+
+    socket.on('disconnect', () => {
+      connectionStatus.classList.remove('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-200');
+      connectionStatus.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-200');
+      connectionStatus.innerHTML = '<span class="w-2 h-2 mr-2 bg-red-500 rounded-full animate-pulse"></span> Disconnected';
+      addMessage('Disconnected from the auction server.', 'error');
+    });
+
+    // Handles the initial auction state when joining a room
+    socket.on('auctionState', (state) => {
+      currentAuctionId = state.auctionId;
+      currentAuctionIdDisplay.textContent = currentAuctionId;
+      const bidderId = state.currentHighestBid.bidderId;
+      updateHighestBid(state.currentHighestBid.amount, state.currentHighestBid.bidderId, state.currentHighestBid.bidderUsername);
+
+      if (bidderId) {
+        addMessage(`You’ve joined auction room ${state.auctionId}. The current highest bid is $${state.currentHighestBid.amount}, placed by ${state.currentHighestBid.bidderUsername}.`);
+
+      } else {
+        addMessage(`You’ve joined auction room ${state.auctionId}. There are no bids yet.`);
+
+      }
+
+      if (state.isClosed) {
+        addMessage(`This auction is already closed.`, 'error');
+        bidForm.classList.add('hidden');
+      } else {
+        bidForm.classList.remove('hidden');
+      }
+
+      // Make the 'End Auction' button visible to all users in auction room
+      endAuctionBtn.classList.remove('hidden');
+
+    });
+
+    // Handles new highest bid events
+    socket.on('newBid', (data) => {
+      // Pass bidderUsername to updateHighestBid
+      updateHighestBid(data.newBid.amount, data.newBid.bidderId, data.newBid.bidderUsername);
+      addMessage(`${data.newBid.bidderUsername} has placed a new bid of $${data.newBid.amount}.`);
+    });
+
+    // Handles bid rejection events
+    socket.on('bidRejected', (data) => {
+      addMessage(`Bid rejected: ${data.message}`, 'error');
+    });
+
+    // Handles auction end events
+    socket.on('auctionEnd', (data) => {
+      // Pass bidderUsername to updateHighestBid
+      updateHighestBid(data.winningBid.amount, data.winningBid.bidderId, data.winningBid.bidderUsername);
+      addMessage(data.message, 'success');
+    });
+
+  };
+
+  const updateHighestBid = (amount, bidderId, bidderUsername) => {
+    highestBidDisplay.textContent = `$${amount.toFixed(2)}`;
+    currentWinnerDisplay.textContent = bidderId === null ? 'No Bids Yet' : `${bidderUsername}`;
+    highestBidDisplay.classList.add('bid-animate');
+    setTimeout(() => {
+      highestBidDisplay.classList.remove('bid-animate');
+    }, 1000);
+    bidAmountInput.value = amount + 1; // Suggest a new bid amount
+  };
+
+  const fetchAuctionsAndRenderList = async () => {
+    try {
+      const auctionsResponse = await fetch(`${API_URL}/auctions`);
+      if (!auctionsResponse.ok) {
+        throw new Error('Failed to fetch auctions');
+      }
+      const auctions = await auctionsResponse.json();
+      renderAuctionList(auctions);
+    } catch (error) {
+      addMessage(`Failed to load auctions: ${error.message}`, 'error');
+    }
+  };
+
+  const renderAuctionList = (auctions) => {
+    auctionListDiv.innerHTML = ''; // Clear previous list
+    if (auctions.length === 0) {
+      auctionListDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No available auctions at the moment.</p>';
+      return;
+    }
+
+    auctions.forEach(auction => {
+      const auctionItem = document.createElement('div');
+      auctionItem.className = 'flex justify-between items-center bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm';
+      auctionItem.innerHTML = `
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Auction #${auction.id}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Car ID: ${auction.carId}</p>
+                    </div>
+                    <button data-auction-id="${auction.id}"
+                            class="join-button py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors duration-200">
+                        Join
+                    </button>
+                `;
+      auctionListDiv.appendChild(auctionItem);
+    });
+
+    // Add event listeners to the new join buttons
+    document.querySelectorAll('.join-button').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const auctionId = parseInt(e.target.dataset.auctionId, 10);
+        auctionListSection.classList.add('hidden');
+        auctionSection.classList.remove('hidden');
+
+        // Pass the token correctly using the 'auth' object
+        initializeSocket(WEBSOCKET_URL, authToken);
+        socket.emit('joinAuction', { auctionId });
+      });
+    });
+  };
+
+  const handleLogout = () => {
+    // Clear the auth token and user data
+    localStorage.removeItem('authToken');
+    authToken = null;
+    currentUser = null;
+
+    // Disconnect socket if connected
+    if (socket) {
+      socket.disconnect();
+    }
+
+    // Reset UI
+    auctionListSection.classList.add('hidden');
+    auctionSection.classList.add('hidden');
+    userInfoDisplay.classList.add('hidden');
+    authSection.classList.remove('hidden');
+
+    // Clear message log
+    messagesDiv.innerHTML = '';
+    addMessage('You have been logged out.', 'info');
+  };
+
+  // Toggle between login and registration forms
+  toggleAuthBtn.addEventListener('click', () => {
+    if (currentAuthMode === 'login') {
+      authTitle.textContent = 'Register';
+      authBtn.textContent = 'Register';
+      toggleAuthBtn.textContent = 'Already have an account? Login';
+      currentAuthMode = 'register';
+      registerFields.classList.remove('hidden');
+      userNameInput.setAttribute('required', 'required');
+      userFullNameInput.setAttribute('required', 'required');
+
+    } else {
+      authTitle.textContent = 'Login';
+      authBtn.textContent = 'Login';
+      toggleAuthBtn.textContent = 'Don\'t have an account? Register';
+      currentAuthMode = 'login';
+      registerFields.classList.add('hidden');
+      userNameInput.removeAttribute('required');
+      userFullNameInput.removeAttribute('required');
+    }
+  });
+
+  authForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = userEmailInput.value;
+    const password = userPasswordInput.value;
+    const endpoint = currentAuthMode === 'login' ? 'login' : 'register';
+
+    let payload = { email, password };
+    if (currentAuthMode === 'register') {
+      const username = userNameInput.value;
+      const fullName = userFullNameInput.value;
+      payload = { ...payload, username, fullName };
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+
+      const { user, token } = await response.json();
+      authToken = token;
+      currentUser = user; // Store the entire user object
+
+      // Store token for later use
+      localStorage.setItem('authToken', token);
+
+      // Update UI to show logged-in state
+      authSection.classList.add('hidden');
+      auctionListSection.classList.remove('hidden');
+      userFullNameSpan.textContent = user.fullName;
+      userInfoDisplay.classList.remove('hidden');
+
+      addMessage(`Successfully logged in as ${user.fullName}. Fetching auctions...`, 'success');
+
+      await fetchAuctionsAndRenderList();
+
+    } catch (error) {
+      addMessage(`Authentication failed: ${error.message}`, 'error');
+    }
+  });
+
+  bidForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const amount = parseFloat(bidAmountInput.value);
+
+    if (isNaN(amount) || amount <= 0) {
+      addMessage('Please enter a valid bid amount.', 'error');
+      return;
+    }
+
+    // Emit the 'placeBid' event, the bidderId is now handled by the server
+    socket.emit('placeBid', {
+      auctionId: currentAuctionId,
+      amount,
+    });
+  });
+
+  leaveAuctionBtn.addEventListener('click', async () => {
+    // Disconnect from the current WebSocket room
+    if (socket) {
+      socket.disconnect();
+      addMessage(`You have left auction room ${currentAuctionId}.`, 'info');
+    }
+
+    // Hide the auction view and show the list again
+    auctionSection.classList.add('hidden');
+    auctionListSection.classList.remove('hidden');
+
+    currentAuctionId = null; // Clear the current auction ID
+
+    // Hide the button when user leaves the room
+    endAuctionBtn.classList.add('hidden');
+
+    // Fetch the latest list of auctions in case it has changed
+    await fetchAuctionsAndRenderList();
+  });
+
+
+  endAuctionBtn.addEventListener('click', () => {
+    if (currentAuctionId) {
+      socket.emit('endAuction', { auctionId: currentAuctionId });
+      addMessage(`Requesting to end auction ${currentAuctionId}.`, 'info');
+    } else {
+      addMessage('Cannot end an auction when not in a room.', 'error');
+    }
+  });
+
+  logoutBtn.addEventListener('click', handleLogout);
+
+  // Check for an existing token on page load
+  const storedToken = localStorage.getItem('authToken');
+  if (storedToken) {
+    authToken = storedToken;
+
+    // A real app would have an endpoint to get user details from the token.
+    // For this example, we'll store a placeholder user and assume the role is
+    // 'user' for a stored session.
+    try {
+      const parts = storedToken.split('.');
+      const payload = JSON.parse(atob(parts[1]));
+      currentUser = {
+        fullName: payload.fullName || 'Authenticated User',
+        role: payload.role || 'user',
+      };
+    } catch (e) {
+      console.error('Failed to parse token payload:', e);
+      currentUser = { fullName: 'Authenticated User', role: 'user' };
+    }
+
+    authSection.classList.add('hidden');
+    auctionListSection.classList.remove('hidden');
+    addMessage(`Found existing session. Fetching auctions...`, 'success');
+    fetchAuctionsAndRenderList();
+
+    userFullNameSpan.textContent = currentUser.fullName;
+    userInfoDisplay.classList.remove('hidden');
+  }
+</script>
+</body>
+</html>
