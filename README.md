@@ -114,7 +114,7 @@ brew install redis
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ProfSnape07/real_time_car_auction
 cd car_auction
 ```
 
